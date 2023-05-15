@@ -30,6 +30,14 @@ public class ConnectDB {
             ResultSet rs = st.executeQuery();
             return rs;
         } catch (Exception e) {
+            System.err.println(e);
+        }
+        try {
+            PreparedStatement st = conn
+                    .prepareStatement(q);
+            st.execute();
+        } catch (Exception e) {
+            System.err.println(e);
         }
         return null;
     }

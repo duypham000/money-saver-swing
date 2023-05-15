@@ -4,6 +4,7 @@
  */
 package com.ms.forms;
 
+import com.db.dao.EventAdapter;
 import com.ms.dialogs.Add_Edit_Form;
 import com.raven.model.Activity;
 import com.raven.swing.ScrollBar;
@@ -15,6 +16,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import com.db.models.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  *
@@ -23,12 +28,16 @@ import javax.swing.table.DefaultTableModel;
 public class Form_EventMngr extends javax.swing.JPanel {
 
     private int selectedId = -1;
+    private List<Integer> idList = new ArrayList<Integer>();
+
+    private EventAdapter eventAdapter;
 
     /**
      * Creates new form Form_EventMngr
      */
     public Form_EventMngr() {
         initComponents();
+        eventAdapter = new EventAdapter();
 //  add row table
         spTable.setVerticalScrollBar(new ScrollBar());
         spTable.getVerticalScrollBar().setBackground(Color.WHITE);
@@ -37,10 +46,6 @@ public class Form_EventMngr extends javax.swing.JPanel {
         p.setBackground(Color.WHITE);
         spTable.setCorner(JScrollPane.UPPER_RIGHT_CORNER, p);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.addRow(new Object[]{"18k", "xôi", "25 Apr,2018", "Thu"});
-        table.addRow(new Object[]{"20k", "cơm", "25 Apr,2018", "Chi"});
-        table.addRow(new Object[]{"20k", "muối", "27 Apr,2018", "Hàng ngày"});
-        table.addRow(new Object[]{"25k", "cháo", "25 Apr,2018", "Hàng tháng"});
 
         ListSelectionModel rowSM = table.getSelectionModel();
         rowSM.addListSelectionListener(new ListSelectionListener() {
@@ -52,8 +57,27 @@ public class Form_EventMngr extends javax.swing.JPanel {
                 int selectedIndex = rowSM.getMinSelectionIndex();
 //                var sel = table.getSelectedColumns();
                 setSelected(selectedIndex);
+                btn_delete.setEnabled(true);
+                btn_edit.setEnabled(true);
             }
         });
+        updateData();
+    }
+
+    private void updateData() {
+        List<Event> eList = new ArrayList<Event>();
+        eList = eventAdapter.getAllById(1);
+
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
+        idList.clear();
+
+        for (int i = 0; i < eList.size(); i++) {
+            Event e = eList.get(i);
+            idList.add(i, e.id);
+            table.addRow(new Object[]{e.price, e.desc, e.time, e.type});
+        }
+//        table.addRow(new Object[]{"20k", "muối", "27 Apr,2018", "Hàng ngày"});
     }
 
     /**
@@ -300,6 +324,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
         btn_edit.setForeground(new java.awt.Color(255, 255, 255));
         btn_edit.setText("Sửa");
         btn_edit.setBorderPainted(false);
+        btn_edit.setEnabled(false);
         btn_edit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_editActionPerformed(evt);
@@ -348,6 +373,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
         btn_delete.setForeground(new java.awt.Color(255, 255, 255));
         btn_delete.setText("Xóa");
         btn_delete.setBorderPainted(false);
+        btn_delete.setEnabled(false);
         btn_delete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_deleteActionPerformed(evt);
@@ -396,23 +422,47 @@ public class Form_EventMngr extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void setSelected(int id) {
-        this.selectedId = id;
+        if (id == -1) {
+            return;
+        }
+        this.selectedId = idList.get(id);
     }
     private void btn_deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteActionPerformed
-        var res = table.getSelectedRow();
-        System.out.println(res);
+        if (this.selectedId == -1) {
+            return;
+        }
+        EventAdapter.delete(this.selectedId);
+        updateData();
     }//GEN-LAST:event_btn_deleteActionPerformed
 
     private void btn_editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editActionPerformed
-        var editForm = new Add_Edit_Form(new Activity(15000, "Mua cháo", "25/7/2022 11:25 PM", "Ngẫu nhiên"));
+        if (this.selectedId == -1) {
+            return;
+        }
+        Event d = EventAdapter.getById(selectedId);
+        var editForm = new Add_Edit_Form(d);
         editForm.setAlwaysOnTop(true);
         editForm.setVisible(true);
+        editForm.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // your code
+                updateData();
+            }
+        });
     }//GEN-LAST:event_btn_editActionPerformed
 
     private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
         var addForm = new Add_Edit_Form();
         addForm.setAlwaysOnTop(true);
         addForm.setVisible(true);
+        addForm.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // your code
+                updateData();
+            }
+        });
     }//GEN-LAST:event_btn_addActionPerformed
 
 

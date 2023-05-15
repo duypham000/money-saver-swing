@@ -6,6 +6,7 @@ package com.db.dao;
 
 import com.db.models.Account;
 import com.db.models.Event;
+import com.ms.services.Converter;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,17 +26,29 @@ public class EventAdapter {
             ConnectDB conn = new ConnectDB();
             ResultSet e = conn.query("SELECT * FROM `events` WHERE userId = " + userId);
             while (e.next()) {
-                res.add(new Event(e.getInt(1), e.getDouble(2), e.getNString(3), e.getString(4), e.getNString(5), e.getInt(6), e.getBoolean(7)));
+                res.add(new Event(e.getInt(1), e.getDouble(2), e.getNString(3), Converter.timeToPicker(e.getString(4)), e.getNString(5), e.getInt(6)));
             }
         } catch (Exception e) {
         }
         return res;
     }
 
+    public static Event getById(int id) {
+        try {
+            ConnectDB conn = new ConnectDB();
+            ResultSet e = conn.query("SELECT * FROM `events` WHERE id = " + id);
+            while (e.next()) {
+                return new Event(e.getInt(1), e.getDouble(2), e.getNString(3), Converter.timeToPicker(e.getString(4)), e.getNString(5), e.getInt(6));
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
     public static void insert(Event event) {
         try {
             ConnectDB conn = new ConnectDB();
-            conn.query("INSERT INTO `events` (`id`, `price`, `description`, `time`, `type`, `userId`, `isConstant`) VALUES (NULL, '" + event.price + "', '" + event.desc + "', '" + event.time + "', '" + event.type + "', '" + event.userId + "', '" + (event.isConstant == true ? 1 : 0) + "');");
+            conn.query("INSERT INTO `events` (`id`, `price`, `description`, `time`, `type`, `userId`) VALUES (NULL, '" + event.price + "', '" + event.desc + "', '" + Converter.pickerToTime(event.time) + "', '" + event.type + "', '" + event.userId + "');");
         } catch (Exception e) {
         }
     }
@@ -43,7 +56,7 @@ public class EventAdapter {
     public static void update(Event event) {
         try {
             ConnectDB conn = new ConnectDB();
-            conn.query("UPDATE `events` SET `price` = '" + event.price + "', `description` = '" + event.desc + "', `type` = '" + event.type + "', `time` = '" + event.time + "', `userId` = '" + event.userId + "', `isConstant` = '" + event.isConstant + "' WHERE `events`.`id` = " + event.id + ";");
+            conn.query("UPDATE `events` SET `price` = '" + event.price + "', `description` = N'" + event.desc + "', `type` = N'" + event.type + "', `time` = '" + Converter.pickerToTime(event.time) + "', `userId` = '" + event.userId + "' WHERE `events`.`id` = " + event.id + ";");
         } catch (Exception e) {
         }
     }
@@ -51,7 +64,7 @@ public class EventAdapter {
     public static void delete(int id) {
         try {
             ConnectDB conn = new ConnectDB();
-            conn.query("DELETE `events` WHERE id = " + id);
+            conn.query("DELETE FROM `events` WHERE id = " + id);
         } catch (Exception e) {
         }
     }

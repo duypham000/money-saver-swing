@@ -4,12 +4,14 @@
  */
 package com.ms.dialogs;
 
+import com.db.dao.EventAdapter;
 import com.raven.datechooser.EventDateChooser;
 import com.raven.datechooser.SelectedAction;
 import com.raven.datechooser.SelectedDate;
 import com.raven.event.EventTimePicker;
 import java.awt.event.KeyEvent;
 import com.raven.model.Activity;
+import com.db.models.*;
 
 /**
  *
@@ -17,20 +19,23 @@ import com.raven.model.Activity;
  */
 public class Add_Edit_Form extends javax.swing.JFrame {
 
+    private Event edit;
+
     /**
      * Creates new form add_activity
      */
-    public Add_Edit_Form(Activity act) {
+    public Add_Edit_Form(Event act) {
         initComponents();
         setup();
+        edit = act;
         lbl_title.setText("Sửa hoạt động");
         inpt_money.setText(act.price + "");
         inpt_detail.setText(act.desc);
 
-        inpt_date.setText(act.dateTime);
+        inpt_date.setText(act.time);
 
-        var date = act.dateTime.split(" ")[0].split("/");
-        String time = act.dateTime.split(" ")[1] + " " + act.dateTime.split(" ")[2];
+        var date = act.time.split(" ")[0].split("/");
+        String time = act.time.split(" ")[1] + " " + act.time.split(" ")[2];
         SelectedDate dt = new SelectedDate(Integer.parseInt(date[0]), Integer.parseInt(date[1]), Integer.parseInt(date[2]));
         date_picker.setSelectedDate(dt);
         time_picker.setSelectedTime(time);
@@ -58,6 +63,7 @@ public class Add_Edit_Form extends javax.swing.JFrame {
     public Add_Edit_Form() {
         initComponents();
         setup();
+        edit = null;
         lbl_title.setText("Thêm hoạt động");
     }
 
@@ -346,8 +352,19 @@ public class Add_Edit_Form extends javax.swing.JFrame {
         String dsc = inpt_detail.getText();
         String dt = inpt_date.getText();
         String type = inpt_type.getSelectedItem().toString();
-        Activity res = new Activity(mny, dsc, dt, type);
-        System.out.println(res.toString());
+        if (edit == null) {
+            Event r = new Event(-1, mny, dsc, dt, type, 1);
+            EventAdapter.insert(r);
+        } else {
+            Event r = edit;
+            r.price = mny;
+            r.desc = dsc;
+            r.time = dt;
+            r.type = type;
+            EventAdapter.update(r);
+        }
+        this.dispose();
+
     }//GEN-LAST:event_btn_add1ActionPerformed
 
     private void btn_removeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_removeActionPerformed

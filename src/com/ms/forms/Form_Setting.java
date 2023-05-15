@@ -4,6 +4,7 @@
  */
 package com.ms.forms;
 
+import com.db.models.Event;
 import com.ms.dialogs.Add_Edit_Form;
 import com.raven.model.Activity;
 import java.awt.event.KeyEvent;
@@ -359,7 +360,7 @@ public class Form_Setting extends javax.swing.JPanel {
     }//GEN-LAST:event_btn_addActionPerformed
 
     private void btn_editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editActionPerformed
-        var editForm = new Add_Edit_Form(new Activity(15000, "Mua cháo", "25/7/2022 11:25 PM", "Ngẫu nhiên"));
+        var editForm = new Add_Edit_Form(new Event(1 ,15000, "Mua cháo", "25/7/2022 11:25 PM", "Ngẫu nhiên", 1));
         editForm.setAlwaysOnTop(true);
         editForm.setVisible(true);
     }//GEN-LAST:event_btn_editActionPerformed

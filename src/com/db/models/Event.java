@@ -10,14 +10,13 @@ package com.db.models;
  */
 public class Event {
 
-    public Event(int id, double price, String desc, String time, String type, int userId, boolean isConstant) {
+    public Event(int id, double price, String desc, String time, String type, int userId) {
         this.id = id;
         this.price = price;
         this.desc = desc;
         this.time = time;
         this.type = type;
         this.userId = userId;
-        this.isConstant = isConstant;
     }
 
     public int id;
@@ -26,5 +25,4 @@ public class Event {
     public String time;
     public String type;
     public int userId;
-    public boolean isConstant;
 }

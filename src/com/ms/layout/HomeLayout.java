@@ -26,22 +26,22 @@ public class HomeLayout extends javax.swing.JFrame {
 
     public HomeLayout() {
         initComponents();
-        total = new Form_Total();
-        setting = new Form_Setting();
-        eventMngr = new Form_EventMngr();
-        setForm(new Form_EventMngr());
+//        total =;
+//        setting = new Form_Setting();
+//        eventMngr =;
+        triggle_menu(1);
     }
 
     void triggle_menu(int id) {
         switch (id) {
             case 1:
-                setForm(this.eventMngr);
+                setForm(new Form_EventMngr());
                 break;
             case 2:
-                setForm(this.total);
+                setForm(new Form_Total());
                 break;
             case 3:
-                setForm(this.setting);
+                setForm(new Form_Setting());
                 break;
             default:
                 throw new AssertionError();

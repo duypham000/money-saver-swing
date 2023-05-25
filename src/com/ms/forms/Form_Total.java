@@ -5,8 +5,26 @@
  */
 package com.ms.forms;
 
+import com.db.dao.EventAdapter;
+import com.db.models.Event;
 import com.ms.chart.ModelChart;
+import com.ms.services.Converter;
+import com.raven.datechooser.EventDateChooser;
+import com.raven.datechooser.SelectedAction;
+import com.raven.datechooser.SelectedDate;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import javax.swing.table.DefaultTableModel;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,22 +35,146 @@ public class Form_Total extends javax.swing.JPanel {
     /**
      * Creates new form Form_1
      */
-    public Form_Total() {
+    private int userId = -1;
+    private List<Event> rawList;
+
+    public Form_Total(int id) {
         initComponents();
+        this.userId = id;
+
+        total_chart.addLegend("Chi định kỳ", new Color(186, 123, 247), new Color(186, 123, 247));
+        total_chart.addLegend("Thu", new Color(46, 204, 113), new Color(95, 209, 69));
+        total_chart.addLegend("Chi linh tinh", new Color(231, 76, 60), new Color(231, 76, 60));
+
+        rawList = EventAdapter.getAllById(this.userId);
+        inpt_type.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                switch (inpt_type.getSelectedIndex()) {
+                    case 0:
+                        rawList = EventAdapter.getAllById(id);
+                        break;
+                    case 1:
+                        rawList = EventAdapter.getAllDayById(id);
+                        break;
+                    case 2:
+                        rawList = EventAdapter.getAllMonthById(id);
+                        break;
+                    default:
+                        rawList = EventAdapter.getAllYearById(id);
+                        break;
+                }
+                setup();
+            }
+        });
+
+        dateStart.addEventDateChooser(new EventDateChooser() {
+            @Override
+            public void dateSelected(SelectedAction action, SelectedDate d) {
+                if (cbx_start.getState()) {
+                    inpt_dateStart.setText(d.toString());
+                    setup();
+                }
+            }
+        });
+        dateEnd.addEventDateChooser(new EventDateChooser() {
+            @Override
+            public void dateSelected(SelectedAction action, SelectedDate d) {
+                if (cbx_dateEnd.getState()) {
+                    inpt_dateEnd.setText(d.toString());
+                    setup();
+                }
+            }
+        });
+
         setup();
     }
 
+    /*
+    0: tất cả
+    1: hôm nay
+    2: tháng này
+    3: năm nay
+     */
     void setup() {
-        total_chart.addLegend("Income", new Color(12, 84, 175), new Color(0, 108, 247));
-        total_chart.addLegend("Expense", new Color(54, 4, 143), new Color(104, 49, 200));
-        total_chart.addLegend("Profit", new Color(5, 125, 0), new Color(95, 209, 69));
-        total_chart.addLegend("Cost", new Color(186, 37, 37), new Color(241, 100, 120));
-        total_chart.addData(new ModelChart("", new double[]{500, 200, 80, 89}));
-        total_chart.addData(new ModelChart("", new double[]{1000, 750, 90, 150}));
-        total_chart.addData(new ModelChart("", new double[]{200, 350, 460, 900}));
-        total_chart.addData(new ModelChart("", new double[]{480, 150, 750, 700}));
-        total_chart.addData(new ModelChart("", new double[]{350, 540, 300, 150}));
-        total_chart.addData(new ModelChart("", new double[]{190, 280, 81, 200}));
+        total_chart.clear();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        List<Event> eList = new ArrayList<Event>();
+        for (int i = 0; i < rawList.size(); i++) {
+            Event get = rawList.get(i);
+            boolean checkStartDate = false;
+            boolean checkEndDate = false;
+            try {
+                checkStartDate = inpt_dateStart.getText().equals(Converter.pickerToTime(get.time).split(" ")[0]) || sdf.parse(inpt_dateStart.getText()).before(sdf.parse(Converter.pickerToTime(get.time).split(" ")[0]));
+            } catch (ParseException ex) {
+                checkStartDate = true;
+            }
+            try {
+                checkEndDate = inpt_dateEnd.getText().equals(Converter.pickerToTime(get.time).split(" ")[0]) || sdf.parse(Converter.pickerToTime(get.time).split(" ")[0]).before(sdf.parse(inpt_dateEnd.getText()));
+            } catch (ParseException ex) {
+                checkEndDate = true;
+            }
+
+            if (checkStartDate && checkEndDate) {
+                eList.add(get);
+            }
+        }
+        double t = 0, lt = 0, dk = 0, total = 0;
+        for (int i = 0; i < eList.size(); i++) {
+            Event e = eList.get(i);
+            total += e.price;
+            if (e.type.equals("Thu")) {
+                t += e.price;
+            } else if (e.type.equals("Ngẫu nhiên")) {
+                lt += e.price;
+            } else {
+                dk += e.price;
+            }
+            table.addRow(new Object[]{e.price, e.desc, e.time, e.type});
+        }
+
+        txt_thu.setText("Thu: " + Converter.formatPrice(t));
+        txt_dinhky.setText("Định kỳ: " + Converter.formatPrice(dk));
+        txt_linhtinh.setText("Linh tinh: " + Converter.formatPrice(lt));
+        txt_tong.setText("Tổng: " + Converter.formatPrice(total));
+
+        List<double[]> log = new ArrayList<double[]>();
+
+        double[] currentPrice = new double[]{0, 0, 0};
+
+        if (eList.size() == 0) {
+            return;
+        }
+        String curTime = eList.get(0).time.split(" ")[0];
+        for (int i = 0; i < eList.size(); i++) {
+            Event e = eList.get(i);
+            if ((curTime.equals(e.time.split(" ")[0]))) {
+                int index = 0;
+                if (e.type.equals("Thu")) {
+                    index = 1;
+                } else if (e.type.equals("Ngẫu nhiên")) {
+                    index = 2;
+                }
+                currentPrice[index] += e.price;
+            } else {
+                total_chart.addData(new ModelChart(curTime, currentPrice));
+                curTime = e.time.split(" ")[0];
+                log.add(currentPrice);
+                int index = 0;
+                if (e.type.equals("Thu")) {
+                    index = 1;
+                } else if (e.type.equals("Ngẫu nhiên")) {
+                    index = 2;
+                }
+                currentPrice = new double[]{0, 0, 0};
+                currentPrice[index] += e.price;
+            }
+            if (i == eList.size() - 1) {
+                total_chart.addData(new ModelChart(curTime, currentPrice));
+                log.add(currentPrice);
+            }
+        }
         total_chart.start();
     }
 
@@ -57,14 +199,14 @@ public class Form_Total extends javax.swing.JPanel {
         btn_end = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        checkbox1 = new java.awt.Checkbox();
-        checkbox2 = new java.awt.Checkbox();
+        cbx_start = new java.awt.Checkbox();
+        cbx_dateEnd = new java.awt.Checkbox();
         jLabel8 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
+        txt_dinhky = new javax.swing.JLabel();
+        txt_thu = new javax.swing.JLabel();
+        txt_linhtinh = new javax.swing.JLabel();
+        txt_tong = new javax.swing.JLabel();
         spTable = new javax.swing.JScrollPane();
         table = new com.raven.swing.Table();
 
@@ -75,9 +217,8 @@ public class Form_Total extends javax.swing.JPanel {
         inpt_type.setBackground(new java.awt.Color(255, 255, 255));
         inpt_type.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         inpt_type.setForeground(new java.awt.Color(127, 140, 141));
-        inpt_type.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả", "Hôm nay", "Tuần này", "Tháng này", "Năm nay" }));
+        inpt_type.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả", "Hôm nay", "Tháng này", "Năm nay" }));
 
-        inpt_dateStart.setEditable(false);
         inpt_dateStart.setBackground(new java.awt.Color(255, 255, 255));
         inpt_dateStart.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         inpt_dateStart.setCaretColor(new java.awt.Color(127, 140, 141));
@@ -96,7 +237,6 @@ public class Form_Total extends javax.swing.JPanel {
             }
         });
 
-        inpt_dateEnd.setEditable(false);
         inpt_dateEnd.setBackground(new java.awt.Color(255, 255, 255));
         inpt_dateEnd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         inpt_dateEnd.setCaretColor(new java.awt.Color(127, 140, 141));
@@ -123,21 +263,33 @@ public class Form_Total extends javax.swing.JPanel {
         jLabel7.setForeground(new java.awt.Color(127, 140, 141));
         jLabel7.setText("Ngày bắt đầu");
 
+        cbx_start.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbx_startItemStateChanged(evt);
+            }
+        });
+
+        cbx_dateEnd.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbx_dateEndItemStateChanged(evt);
+            }
+        });
+
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(127, 140, 141));
         jLabel8.setText("Dạng");
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel1.setText("Định kỳ: 13000000");
+        txt_dinhky.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_dinhky.setText("Định kỳ: 13000000");
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel2.setText("Thu: 7000000");
+        txt_thu.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_thu.setText("Thu: 7000000");
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel3.setText("Linh tinh: 1000000");
+        txt_linhtinh.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_linhtinh.setText("Linh tinh: 1000000");
 
-        jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel4.setText("Tiết kiệm: 15000000");
+        txt_tong.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txt_tong.setText("Tổng: 15000000");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -147,13 +299,13 @@ public class Form_Total extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txt_thu, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(txt_dinhky, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txt_linhtinh, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)))
+                        .addComponent(txt_tong, javax.swing.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -161,12 +313,12 @@ public class Form_Total extends javax.swing.JPanel {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txt_thu, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_dinhky, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_linhtinh, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_tong, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -186,7 +338,7 @@ public class Form_Total extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btn_start, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(checkbox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbx_start, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(inpt_dateEnd)
@@ -194,7 +346,7 @@ public class Form_Total extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btn_end, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(checkbox2, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbx_dateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 161, Short.MAX_VALUE)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -204,9 +356,6 @@ public class Form_Total extends javax.swing.JPanel {
             .addGroup(inpt_ctnLayout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, inpt_ctnLayout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, inpt_ctnLayout.createSequentialGroup()
                         .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(inpt_ctnLayout.createSequentialGroup()
@@ -221,8 +370,8 @@ public class Form_Total extends javax.swing.JPanel {
                                         .addGroup(inpt_ctnLayout.createSequentialGroup()
                                             .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                 .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(checkbox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(checkbox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(cbx_start, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(cbx_dateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                             .addGap(4, 4, 4)))
                                     .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addComponent(inpt_dateStart, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -231,7 +380,8 @@ public class Form_Total extends javax.swing.JPanel {
                                     .addComponent(inpt_dateEnd, javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(btn_end, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addComponent(inpt_type, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(21, 21, 21))))
+                        .addGap(21, 21, 21))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
 
         spTable.setBorder(null);
@@ -308,22 +458,44 @@ public class Form_Total extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_inpt_dateStartKeyPressed
 
+    private void cbx_startItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbx_startItemStateChanged
+        // TODO add your handling code here:
+        if (evt.getStateChange() == ItemEvent.SELECTED) {//checkbox has been selected
+            //do something...
+            inpt_dateStart.setText(dateStart.getSelectedDate().toString());
+        } else {//checkbox has been deselected
+            //do something...
+            inpt_dateStart.setText("");
+        };
+        setup();
+    }//GEN-LAST:event_cbx_startItemStateChanged
+
+    private void cbx_dateEndItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbx_dateEndItemStateChanged
+        // TODO add your handling code here:
+
+        // TODO add your handling code here:
+        if (evt.getStateChange() == ItemEvent.SELECTED) {//checkbox has been selected
+            //do something...
+            inpt_dateEnd.setText(dateEnd.getSelectedDate().toString());
+        } else {//checkbox has been deselected
+            //do something...
+            inpt_dateEnd.setText("");
+        };
+        setup();
+    }//GEN-LAST:event_cbx_dateEndItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_end;
     private javax.swing.JButton btn_start;
-    private java.awt.Checkbox checkbox1;
-    private java.awt.Checkbox checkbox2;
+    private java.awt.Checkbox cbx_dateEnd;
+    private java.awt.Checkbox cbx_start;
     private com.raven.datechooser.DateChooser dateEnd;
     private com.raven.datechooser.DateChooser dateStart;
     private javax.swing.JPanel inpt_ctn;
     private javax.swing.JTextField inpt_dateEnd;
     private javax.swing.JTextField inpt_dateStart;
     private javax.swing.JComboBox<String> inpt_type;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -332,5 +504,9 @@ public class Form_Total extends javax.swing.JPanel {
     private javax.swing.JScrollPane spTable;
     private com.raven.swing.Table table;
     private com.ms.chart.CurveChart total_chart;
+    private javax.swing.JLabel txt_dinhky;
+    private javax.swing.JLabel txt_linhtinh;
+    private javax.swing.JLabel txt_thu;
+    private javax.swing.JLabel txt_tong;
     // End of variables declaration//GEN-END:variables
 }

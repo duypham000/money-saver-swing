@@ -31,24 +31,12 @@ public class TableStatus extends JLabel {
             Graphics2D g2 = (Graphics2D) grphcs;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             GradientPaint g;
-            switch (type) {
-                case "Hàng ngày":
-                    g = new GradientPaint(0, 0, new Color(186, 123, 247), 0, getHeight(), new Color(167, 94, 236));
-                    break;
-                case "Hàng tháng":
-                    g = new GradientPaint(0, 0, new Color(142, 142, 250), 0, getHeight(), new Color(123, 123, 245));
-                    break;
-                case "Ngẫu nhiên":
-                    g = new GradientPaint(0, 0, new Color(241, 208, 62), 0, getHeight(), new Color(211, 184, 61));
-                case "Thu":
-                    g = new GradientPaint(0, 0, new Color(46, 204, 113), 0, getHeight(), new Color(39, 174, 96));
-                    break;
-                case "Chi":
-                    g = new GradientPaint(0, 0, new Color(243, 156, 18), 0, getHeight(), new Color(241, 196, 15));
-                    break;
-                default:
-                    g = new GradientPaint(0, 0, new Color(46, 204, 113), 0, getHeight(), new Color(39, 174, 96));
-                    break;
+            if (type.equals("Ngẫu nhiên")) {
+                g = new GradientPaint(0, 0, new Color(231, 76, 60), 0, getHeight(), new Color(231, 76, 60));
+            } else if (type.equals("Thu")) {
+                g = new GradientPaint(0, 0, new Color(46, 204, 113), 0, getHeight(), new Color(39, 174, 96));
+            } else {
+                g = new GradientPaint(0, 0, new Color(186, 123, 247), 0, getHeight(), new Color(167, 94, 236));
             }
             g2.setPaint(g);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 1, 1);

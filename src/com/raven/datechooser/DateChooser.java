@@ -19,7 +19,7 @@ public final class DateChooser extends javax.swing.JPanel {
     public JTextField getTextRefernce() {
         return textRefernce;
     }
-
+    
     public void addEventDateChooser(EventDateChooser event) {
         events.add(event);
     }

@@ -4,6 +4,7 @@
  */
 package com.ms.forms;
 
+import com.db.dao.DetailAdapter;
 import com.db.dao.EventAdapter;
 import com.ms.dialogs.Add_Edit_Form;
 import com.raven.model.Activity;
@@ -17,6 +18,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import com.db.models.*;
+import com.ms.services.Converter;
+import com.raven.datechooser.EventDateChooser;
+import com.raven.datechooser.SelectedAction;
+import com.raven.datechooser.SelectedDate;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -28,15 +33,19 @@ import java.util.Map;
 public class Form_EventMngr extends javax.swing.JPanel {
 
     private int selectedId = -1;
+    private int userId = -1;
+
     private List<Integer> idList = new ArrayList<Integer>();
 
     private EventAdapter eventAdapter;
+    private DetailAdapter detailAdapter;
 
     /**
      * Creates new form Form_EventMngr
      */
-    public Form_EventMngr() {
+    public Form_EventMngr(int id) {
         initComponents();
+        this.userId = id;
         eventAdapter = new EventAdapter();
 //  add row table
         spTable.setVerticalScrollBar(new ScrollBar());
@@ -61,23 +70,60 @@ public class Form_EventMngr extends javax.swing.JPanel {
                 btn_edit.setEnabled(true);
             }
         });
+        datePicker.addEventDateChooser(new EventDateChooser() {
+            @Override
+            public void dateSelected(SelectedAction action, SelectedDate d) {
+                inpt_date.setText(d.getDay() + "/" + d.getMonth() + "/" + d.getYear());
+                updateData();
+            }
+        });
         updateData();
     }
 
     private void updateData() {
         List<Event> eList = new ArrayList<Event>();
-        eList = eventAdapter.getAllById(1);
-
+        SelectedDate d = datePicker.getSelectedDate();
+        eList = eventAdapter.getAllByDayVId(userId, d.getDay() + "/" + d.getMonth() + "/" + d.getYear());
+        inpt_date.setText(d.getDay() + "/" + d.getMonth() + "/" + d.getYear());
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
         idList.clear();
+
+        double total = 0;
 
         for (int i = 0; i < eList.size(); i++) {
             Event e = eList.get(i);
             idList.add(i, e.id);
             table.addRow(new Object[]{e.price, e.desc, e.time, e.type});
+            total += e.price;
         }
 //        table.addRow(new Object[]{"20k", "muối", "27 Apr,2018", "Hàng ngày"});
+
+        Detail detail = detailAdapter.getByUserId(userId);
+        label_moneyLeft.setText(Converter.formatPrice(detail.moneyLeft));
+        label_toleft.setText(Converter.formatPrice(detail.maxPriceDay - total));
+        label_cost.setText(Converter.formatPrice(detail.maxPriceDay));
+        double countM = 0, countW = 0, countD = 0;
+        List<Event> eM = eventAdapter.getAllMonthById(userId);
+        List<Event> eD = eventAdapter.getAllDayById(userId);
+        List<Event> eW = eventAdapter.getAllWeekById(userId);
+
+        for (int i = 0; i < eM.size(); i++) {
+            Event e = eM.get(i);
+            countM += e.price;
+        }
+        for (int i = 0; i < eW.size(); i++) {
+            Event e = eW.get(i);
+            countW += e.price;
+        }
+        for (int i = 0; i < eD.size(); i++) {
+            Event e = eD.get(i);
+            countD += e.price;
+        }
+
+        chart_month.setValue((int) Math.round(countM / detail.maxPriceMonth * 100));
+        chart_week.setValue((int) Math.round(countW / detail.maxPriceWeek * 100));
+        chart_today.setValue((int) Math.round(countD / detail.maxPriceDay * 100));
     }
 
     /**
@@ -89,6 +135,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        datePicker = new com.raven.datechooser.DateChooser();
         jPanel1 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         chart_month = new com.ms.chart.LiquidProgress();
@@ -101,19 +148,23 @@ public class Form_EventMngr extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
+        label_moneyLeft = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
+        label_cost = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
+        label_toleft = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         spTable = new javax.swing.JScrollPane();
         table = new com.raven.swing.Table();
-        jPanel3 = new javax.swing.JPanel();
+        action_ctn = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         btn_edit = new javax.swing.JButton();
         btn_add = new javax.swing.JButton();
+        inpt_date = new javax.swing.JTextField();
+        btn_date = new javax.swing.JButton();
         btn_delete = new javax.swing.JButton();
+
+        datePicker.setForeground(new java.awt.Color(52, 152, 219));
 
         setBackground(new java.awt.Color(255, 255, 255));
 
@@ -224,11 +275,11 @@ public class Form_EventMngr extends javax.swing.JPanel {
         jLabel7.setAlignmentX(0.5F);
         jLabel7.setAutoscrolls(true);
 
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(155, 89, 182));
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel8.setText("7,000,000");
-        jLabel8.setAlignmentX(0.5F);
+        label_moneyLeft.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        label_moneyLeft.setForeground(new java.awt.Color(155, 89, 182));
+        label_moneyLeft.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_moneyLeft.setText("7,000,000");
+        label_moneyLeft.setAlignmentX(0.5F);
 
         jLabel9.setBackground(new java.awt.Color(255, 255, 255));
         jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -238,11 +289,11 @@ public class Form_EventMngr extends javax.swing.JPanel {
         jLabel9.setAlignmentX(0.5F);
         jLabel9.setAutoscrolls(true);
 
-        jLabel10.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel10.setForeground(new java.awt.Color(155, 89, 182));
-        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel10.setText("7,000,000");
-        jLabel10.setAlignmentX(0.5F);
+        label_cost.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        label_cost.setForeground(new java.awt.Color(155, 89, 182));
+        label_cost.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_cost.setText("7,000,000");
+        label_cost.setAlignmentX(0.5F);
 
         jLabel11.setBackground(new java.awt.Color(255, 255, 255));
         jLabel11.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -252,22 +303,22 @@ public class Form_EventMngr extends javax.swing.JPanel {
         jLabel11.setAlignmentX(0.5F);
         jLabel11.setAutoscrolls(true);
 
-        jLabel12.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel12.setForeground(new java.awt.Color(155, 89, 182));
-        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel12.setText("7,000,000");
-        jLabel12.setAlignmentX(0.5F);
+        label_toleft.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        label_toleft.setForeground(new java.awt.Color(155, 89, 182));
+        label_toleft.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_toleft.setText("7,000,000");
+        label_toleft.setAlignmentX(0.5F);
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(label_moneyLeft, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
-            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(label_cost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, 297, Short.MAX_VALUE)
-            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(label_toleft, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -275,15 +326,15 @@ public class Form_EventMngr extends javax.swing.JPanel {
                 .addGap(31, 31, 31)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
+                .addComponent(label_moneyLeft)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel9)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel10)
+                .addComponent(label_cost)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel11)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel12)
+                .addComponent(label_toleft)
                 .addContainerGap(34, Short.MAX_VALUE))
         );
 
@@ -313,11 +364,11 @@ public class Form_EventMngr extends javax.swing.JPanel {
         table.getTableHeader().setReorderingAllowed(false);
         spTable.setViewportView(table);
 
-        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        action_ctn.setBackground(new java.awt.Color(255, 255, 255));
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(0, 0, 0));
-        jLabel4.setText("Chi tiêu hôm nay");
+        jLabel4.setText("Quản lý chi tiêu");
 
         btn_edit.setBackground(new java.awt.Color(46, 204, 113));
         btn_edit.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -342,30 +393,56 @@ public class Form_EventMngr extends javax.swing.JPanel {
             }
         });
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
+        inpt_date.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_date.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        inpt_date.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_date.setEnabled(false);
+        inpt_date.setFocusable(false);
+        inpt_date.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_dateKeyPressed(evt);
+            }
+        });
+
+        btn_date.setText("***");
+        btn_date.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_dateActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout action_ctnLayout = new javax.swing.GroupLayout(action_ctn);
+        action_ctn.setLayout(action_ctnLayout);
+        action_ctnLayout.setHorizontalGroup(
+            action_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(action_ctnLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(inpt_date, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btn_date, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btn_add)
                 .addGap(18, 18, 18)
                 .addComponent(btn_edit)
                 .addContainerGap())
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        action_ctnLayout.setVerticalGroup(
+            action_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, action_ctnLayout.createSequentialGroup()
+                .addGap(0, 24, Short.MAX_VALUE)
+                .addGroup(action_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_edit, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_add, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, action_ctnLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(action_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(action_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(inpt_date, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btn_date, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         btn_delete.setBackground(new java.awt.Color(231, 76, 60));
@@ -389,7 +466,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(spTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1179, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(action_ctn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btn_delete)))
                 .addContainerGap())
@@ -398,7 +475,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(action_ctn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_delete, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(spTable, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
@@ -465,31 +542,43 @@ public class Form_EventMngr extends javax.swing.JPanel {
         });
     }//GEN-LAST:event_btn_addActionPerformed
 
+    private void inpt_dateKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_dateKeyPressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_inpt_dateKeyPressed
+
+    private void btn_dateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_dateActionPerformed
+        // TODO add your handling code here:
+        datePicker.showPopup(action_ctn, btn_date.getX() + btn_date.getWidth(), btn_date.getY() + btn_date.getHeight());
+    }//GEN-LAST:event_btn_dateActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel action_ctn;
     private javax.swing.JButton btn_add;
+    private javax.swing.JButton btn_date;
     private javax.swing.JButton btn_delete;
     private javax.swing.JButton btn_edit;
     private com.ms.chart.LiquidProgress chart_month;
     private com.ms.chart.LiquidProgress chart_today;
     private com.ms.chart.LiquidProgress chart_week;
+    private com.raven.datechooser.DateChooser datePicker;
+    private javax.swing.JTextField inpt_date;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JLabel label_cost;
+    private javax.swing.JLabel label_moneyLeft;
+    private javax.swing.JLabel label_toleft;
     private javax.swing.JScrollPane spTable;
     private com.raven.swing.Table table;
     // End of variables declaration//GEN-END:variables

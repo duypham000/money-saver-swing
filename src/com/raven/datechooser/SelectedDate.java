@@ -32,6 +32,11 @@ public class SelectedDate {
         this.year = year;
     }
 
+    @Override
+    public String toString() {
+        return (this.year + "-" + (this.month > 9 ? "" : "0") + this.month + "-"+ (this.day > 9 ? "" : "0") + this.day);
+    }
+
     public SelectedDate() {
     }
 

@@ -4,6 +4,9 @@
  */
 package com.ms.services;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 /**
  *
  * @author khanh
@@ -32,6 +35,14 @@ public class Converter {
         }
         return date[2] + "/" + date[1] + "/" + date[0] + " " + h + ":" + timeP[1] + " " + aa;
     }
+    
+    public static String formatPrice(double price){
+        
+        Locale localeEN = new Locale("en", "EN");
+        NumberFormat en = NumberFormat.getInstance(localeEN);
+        
+        return en.format(price);
+    }
 
     public static void main(String[] args) {
 //        String r = pickerToTime("5/8/2002 5:12 PM");
@@ -39,4 +50,5 @@ public class Converter {
 
         System.out.println(r);
     }
+    
 }

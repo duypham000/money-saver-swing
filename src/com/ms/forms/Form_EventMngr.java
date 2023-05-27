@@ -395,6 +395,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
 
         inpt_date.setBackground(new java.awt.Color(255, 255, 255));
         inpt_date.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        inpt_date.setForeground(new java.awt.Color(0, 0, 0));
         inpt_date.setCaretColor(new java.awt.Color(127, 140, 141));
         inpt_date.setEnabled(false);
         inpt_date.setFocusable(false);
@@ -517,7 +518,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
             return;
         }
         Event d = EventAdapter.getById(selectedId);
-        var editForm = new Add_Edit_Form(d);
+        var editForm = new Add_Edit_Form(d, userId);
         editForm.setAlwaysOnTop(true);
         editForm.setVisible(true);
         editForm.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -530,7 +531,7 @@ public class Form_EventMngr extends javax.swing.JPanel {
     }//GEN-LAST:event_btn_editActionPerformed
 
     private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
-        var addForm = new Add_Edit_Form();
+        var addForm = new Add_Edit_Form(userId);
         addForm.setAlwaysOnTop(true);
         addForm.setVisible(true);
         addForm.addWindowListener(new java.awt.event.WindowAdapter() {

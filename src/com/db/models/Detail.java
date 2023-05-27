@@ -10,7 +10,7 @@ package com.db.models;
  */
 public class Detail {
 
-    public Detail(int id, int idUser, double moneyLeft, double totalMoney, double maxPriceMonth, double maxPriceWeek, double maxPriceDay) {
+    public Detail(int id, int idUser, long moneyLeft, long totalMoney, long maxPriceMonth, long maxPriceWeek, long maxPriceDay) {
         this.id = id;
         this.idUser = idUser;
         this.moneyLeft = moneyLeft;
@@ -22,9 +22,9 @@ public class Detail {
 
     public int id;
     public int idUser;
-    public double moneyLeft;
-    public double totalMoney;
-    public double maxPriceMonth;
-    public double maxPriceWeek;
-    public double maxPriceDay;
+    public long moneyLeft;
+    public long totalMoney;
+    public long maxPriceMonth;
+    public long maxPriceWeek;
+    public long maxPriceDay;
 }

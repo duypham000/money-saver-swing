@@ -102,7 +102,7 @@ public class EventAdapter {
         List<Event> res = new ArrayList<Event>();
         try {
             ConnectDB conn = new ConnectDB();
-            ResultSet e = conn.query("SELECT * FROM `events` WHERE userId = " + userId + " AND "+ (dS != "" ? (" time >= '" + dS + "'") : "" ) + (dE != "" ? (" time <= '" + dE + "'") : "" )+" ORDER BY time");
+            ResultSet e = conn.query("SELECT * FROM `events` WHERE userId = " + userId + " AND " + (dS != "" ? (" time >= '" + dS + "'") : "") + (dE != "" ? (" time <= '" + dE + "'") : "") + " ORDER BY time");
             while (e.next()) {
                 res.add(new Event(e.getInt(1), e.getDouble(2), e.getNString(3), Converter.timeToPicker(e.getString(4)), e.getNString(5), e.getInt(6)));
             }
@@ -126,7 +126,12 @@ public class EventAdapter {
     public static void insert(Event event) {
         try {
             ConnectDB conn = new ConnectDB();
+            boolean isPlus = false;
+            if (event.type.equals("Thu")) {
+                isPlus = true;
+            }
             conn.query("INSERT INTO `events` (`id`, `price`, `description`, `time`, `type`, `userId`) VALUES (NULL, '" + event.price + "', '" + event.desc + "', '" + Converter.pickerToTime(event.time) + "', '" + event.type + "', '" + event.userId + "');");
+            conn.query("UPDATE `detail` SET `moneyLeft` = moneyLeft " + (isPlus ? "+" : "-") + " " + event.price + " WHERE `detail`.`idUser` = " + event.userId);
         } catch (Exception e) {
         }
     }
@@ -134,7 +139,13 @@ public class EventAdapter {
     public static void update(Event event) {
         try {
             ConnectDB conn = new ConnectDB();
+            Event prev = getById(event.id);
+            boolean isPlus = false;
+            if (event.type.equals("Thu")) {
+                isPlus = true;
+            }
             conn.query("UPDATE `events` SET `price` = '" + event.price + "', `description` = N'" + event.desc + "', `type` = N'" + event.type + "', `time` = '" + Converter.pickerToTime(event.time) + "', `userId` = '" + event.userId + "' WHERE `events`.`id` = " + event.id + ";");
+            conn.query("UPDATE `detail` SET `moneyLeft` = moneyLeft " + (isPlus ? "+" : "-") + event.price + (isPlus ? "-" : "+") + prev.price + " WHERE `detail`.`idUser` = " + event.userId);
         } catch (Exception e) {
         }
     }
@@ -142,6 +153,12 @@ public class EventAdapter {
     public static void delete(int id) {
         try {
             ConnectDB conn = new ConnectDB();
+            Event prev = getById(id);
+            boolean isPlus = false;
+            if (prev.type.equals("Thu")) {
+                isPlus = true;
+            }
+            conn.query("UPDATE `detail` SET `moneyLeft` = moneyLeft " + (isPlus ? "+" : "-") + " " + prev.price + " WHERE `detail`.`idUser` = " + prev.userId);
             conn.query("DELETE FROM `events` WHERE id = " + id);
         } catch (Exception e) {
         }

@@ -11,6 +11,7 @@ import com.ms.dialogs.Login_Form;
 import com.ms.layout.HomeLayout;
 import java.sql.ResultSet;
 import java.util.List;
+import javax.swing.JFrame;
 
 /**
  *
@@ -34,7 +35,9 @@ public class MoneySaver {
                         int id = login.getId();
                         System.out.println(id);
                         if (id != -1) {
-                            new HomeLayout(id).setVisible(true);
+                            var homeFrm = new HomeLayout(id);
+                            homeFrm.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                            homeFrm.setVisible(true);
                             login.dispose();
                         } else {
                             login.dispose();

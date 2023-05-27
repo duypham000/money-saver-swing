@@ -4,6 +4,7 @@
  */
 package com.ms.dialogs;
 
+import com.db.dao.AccountAdapter;
 import com.raven.model.Activity;
 
 /**
@@ -15,8 +16,12 @@ public class Register_Form extends javax.swing.JFrame {
     /**
      * Creates new form add_activity
      */
-    public Register_Form() {
+    private int userId;
+
+    public Register_Form(int userId) {
+        this.userId = userId;
         initComponents();
+        inpt_username.setText(AccountAdapter.getById(userId).username);
     }
 
     /**
@@ -33,13 +38,16 @@ public class Register_Form extends javax.swing.JFrame {
         lbl_title = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
-        inpt_money = new javax.swing.JTextField();
-        inpt_money1 = new javax.swing.JTextField();
+        inpt_username = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         btn_add = new javax.swing.JButton();
         btn_delete1 = new javax.swing.JButton();
-        inpt_money2 = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
+        inpt_password = new javax.swing.JPasswordField();
+        cbx_show = new javax.swing.JCheckBox();
+        inpt_rePass = new javax.swing.JPasswordField();
+        cbx_show1 = new javax.swing.JCheckBox();
+        j_res = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setAlwaysOnTop(true);
@@ -78,13 +86,9 @@ public class Register_Form extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(127, 140, 141));
         jLabel2.setText("Tài khoản");
 
-        inpt_money.setBackground(new java.awt.Color(255, 255, 255));
-        inpt_money.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        inpt_money.setCaretColor(new java.awt.Color(127, 140, 141));
-
-        inpt_money1.setBackground(new java.awt.Color(255, 255, 255));
-        inpt_money1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        inpt_money1.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_username.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_username.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_username.setCaretColor(new java.awt.Color(127, 140, 141));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(127, 140, 141));
@@ -112,13 +116,47 @@ public class Register_Form extends javax.swing.JFrame {
             }
         });
 
-        inpt_money2.setBackground(new java.awt.Color(255, 255, 255));
-        inpt_money2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        inpt_money2.setCaretColor(new java.awt.Color(127, 140, 141));
-
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel4.setForeground(new java.awt.Color(127, 140, 141));
         jLabel4.setText("Nhập lại mật khẩu");
+
+        inpt_password.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_password.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_password.setForeground(new java.awt.Color(0, 0, 0));
+
+        cbx_show.setBackground(new java.awt.Color(255, 255, 255));
+        cbx_show.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        cbx_show.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbx_showItemStateChanged(evt);
+            }
+        });
+        cbx_show.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbx_showActionPerformed(evt);
+            }
+        });
+
+        inpt_rePass.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_rePass.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_rePass.setForeground(new java.awt.Color(0, 0, 0));
+
+        cbx_show1.setBackground(new java.awt.Color(255, 255, 255));
+        cbx_show1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        cbx_show1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbx_show1ItemStateChanged(evt);
+            }
+        });
+        cbx_show1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbx_show1ActionPerformed(evt);
+            }
+        });
+
+        j_res.setFont(new java.awt.Font("Segoe UI", 2, 14)); // NOI18N
+        j_res.setForeground(new java.awt.Color(0, 0, 0));
+        j_res.setText("Vui lòng đặt mật khẩu thật bảo mật");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -129,7 +167,7 @@ public class Register_Form extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(inpt_money)
+                            .addComponent(inpt_username)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
@@ -138,14 +176,20 @@ public class Register_Form extends javax.swing.JFrame {
                             .addComponent(btn_add, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(inpt_money1, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(31, 31, 31))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(inpt_money2, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 394, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(inpt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cbx_show, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(inpt_rePass, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cbx_show1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(j_res, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel3Layout.setVerticalGroup(
@@ -154,16 +198,22 @@ public class Register_Form extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(inpt_money, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(inpt_username, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(inpt_money1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cbx_show, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(inpt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(inpt_money2, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(cbx_show1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(inpt_rePass, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(j_res)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btn_add, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btn_delete1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -208,14 +258,51 @@ public class Register_Form extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
-        var addForm = new Add_Edit_Form();
-        addForm.setAlwaysOnTop(true);
-        addForm.setVisible(true);
+        String usr = inpt_username.getText();
+        String pss = inpt_password.getText();
+        String rpss = inpt_rePass.getText();
+        if (pss.equals(rpss)) {
+            if (usr.equals("") || pss.equals("") || rpss.equals("")) {
+                j_res.setText("Nhập thiếu!");
+            } else {
+                AccountAdapter.update(userId, usr, pss);
+                this.dispose();
+            }
+        } else {
+            j_res.setText("Nhập lại mật khẩu không khớp!");
+        }
     }//GEN-LAST:event_btn_addActionPerformed
 
     private void btn_delete1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_delete1ActionPerformed
         // TODO add your handling code here:
+        this.dispose();
     }//GEN-LAST:event_btn_delete1ActionPerformed
+
+    private void cbx_showActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbx_showActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbx_showActionPerformed
+
+    private void cbx_show1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbx_show1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbx_show1ActionPerformed
+
+    private void cbx_show1ItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbx_show1ItemStateChanged
+        // TODO add your handling code here:
+        if (cbx_show1.isSelected()) {
+            inpt_rePass.setEchoChar((char) 0); //password = JPasswordField
+        } else {
+            inpt_rePass.setEchoChar('*');
+        }
+    }//GEN-LAST:event_cbx_show1ItemStateChanged
+
+    private void cbx_showItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbx_showItemStateChanged
+        // TODO add your handling code here:
+        if (cbx_show.isSelected()) {
+            inpt_password.setEchoChar((char) 0); //password = JPasswordField
+        } else {
+            inpt_password.setEchoChar('*');
+        }
+    }//GEN-LAST:event_cbx_showItemStateChanged
 
     /**
      * @param args the command line arguments
@@ -224,15 +311,18 @@ public class Register_Form extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_add;
     private javax.swing.JButton btn_delete1;
-    private javax.swing.JTextField inpt_money;
-    private javax.swing.JTextField inpt_money1;
-    private javax.swing.JTextField inpt_money2;
+    private javax.swing.JCheckBox cbx_show;
+    private javax.swing.JCheckBox cbx_show1;
+    private javax.swing.JPasswordField inpt_password;
+    private javax.swing.JPasswordField inpt_rePass;
+    private javax.swing.JTextField inpt_username;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JLabel j_res;
     private javax.swing.JLabel lbl_title;
     // End of variables declaration//GEN-END:variables
 }

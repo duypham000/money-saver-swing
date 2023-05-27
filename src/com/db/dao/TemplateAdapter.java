@@ -22,9 +22,9 @@ public class TemplateAdapter {
         List<Template> res = new ArrayList<Template>();
         try {
             ConnectDB conn = new ConnectDB();
-            ResultSet e = conn.query("SELECT * FROM `templates` WHERE userId = " + userId + " ORDER BY time");
+            ResultSet e = conn.query("SELECT * FROM `templates` WHERE userId = " + userId + " ORDER BY name");
             while (e.next()) {
-                res.add(new Template(e.getInt(1), e.getDouble(2), e.getNString(3), e.getNString(4), e.getNString(5), e.getInt(6)));
+                res.add(new Template(e.getInt(1), e.getDouble(3), e.getNString(2), e.getNString(4), e.getNString(5), e.getInt(6)));
             }
         } catch (Exception e) {
         }
@@ -37,7 +37,7 @@ public class TemplateAdapter {
             ConnectDB conn = new ConnectDB();
             ResultSet e = conn.query("SELECT * FROM `templates` WHERE id = " + id);
             while (e.next()) {
-                return new Template(e.getInt(1), e.getDouble(2), e.getNString(3), e.getNString(4), e.getNString(5), e.getInt(6));
+                return new Template(e.getInt(1), e.getDouble(3), e.getNString(2), e.getNString(4), e.getNString(5), e.getInt(6));
             }
         } catch (Exception e) {
         }
@@ -47,7 +47,7 @@ public class TemplateAdapter {
     public static void insert(Template event) {
         try {
             ConnectDB conn = new ConnectDB();
-            conn.query("INSERT INTO `templates` (`id`, `price`, `description`, `time`, `type`, `userId`) VALUES (NULL, '" + event.price + "', '" + event.desc + "', '" + event.name + "', '" + event.type + "', '" + event.userId + "');");
+            conn.query("INSERT INTO `templates` (`id`, `price`, `description`, `name`, `type`, `userId`) VALUES (NULL, '" + event.price + "', '" + event.desc + "', '" + event.name + "', '" + event.type + "', '" + event.userId + "');");
         } catch (Exception e) {
         }
     }
@@ -55,7 +55,7 @@ public class TemplateAdapter {
     public static void update(Template event) {
         try {
             ConnectDB conn = new ConnectDB();
-            conn.query("UPDATE `templates` SET `price` = '" + event.price + "', `description` = N'" + event.desc + "', `type` = N'" + event.type + "', `time` = '" + event.name + "', `userId` = '" + event.userId + "' WHERE `events`.`id` = " + event.id + ";");
+            conn.query("UPDATE `templates` SET `price` = '" + event.price + "', `description` = '" + event.desc + "', `type` = '" + event.type + "', `name` = '" + event.name + "', `userId` = '" + event.userId + "' WHERE `templates`.`id` = " + event.id + ";");
         } catch (Exception e) {
         }
     }

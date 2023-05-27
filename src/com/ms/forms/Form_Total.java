@@ -105,6 +105,8 @@ public class Form_Total extends javax.swing.JPanel {
             Event get = rawList.get(i);
             boolean checkStartDate = false;
             boolean checkEndDate = false;
+            boolean checkType = false;
+
             try {
                 checkStartDate = inpt_dateStart.getText().equals(Converter.pickerToTime(get.time).split(" ")[0]) || sdf.parse(inpt_dateStart.getText()).before(sdf.parse(Converter.pickerToTime(get.time).split(" ")[0]));
             } catch (ParseException ex) {
@@ -116,7 +118,11 @@ public class Form_Total extends javax.swing.JPanel {
                 checkEndDate = true;
             }
 
-            if (checkStartDate && checkEndDate) {
+            if (inpt_datatype.getSelectedIndex() == 0 || inpt_datatype.getSelectedItem().equals(get.type)) {
+                checkType = true;
+            }
+
+            if (checkStartDate && checkEndDate && checkType) {
                 eList.add(get);
             }
         }
@@ -207,6 +213,8 @@ public class Form_Total extends javax.swing.JPanel {
         txt_thu = new javax.swing.JLabel();
         txt_linhtinh = new javax.swing.JLabel();
         txt_tong = new javax.swing.JLabel();
+        jLabel9 = new javax.swing.JLabel();
+        inpt_datatype = new javax.swing.JComboBox<>();
         spTable = new javax.swing.JScrollPane();
         table = new com.raven.swing.Table();
 
@@ -221,6 +229,7 @@ public class Form_Total extends javax.swing.JPanel {
 
         inpt_dateStart.setBackground(new java.awt.Color(255, 255, 255));
         inpt_dateStart.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        inpt_dateStart.setForeground(new java.awt.Color(0, 0, 0));
         inpt_dateStart.setCaretColor(new java.awt.Color(127, 140, 141));
         inpt_dateStart.setEnabled(false);
         inpt_dateStart.setFocusable(false);
@@ -239,6 +248,7 @@ public class Form_Total extends javax.swing.JPanel {
 
         inpt_dateEnd.setBackground(new java.awt.Color(255, 255, 255));
         inpt_dateEnd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        inpt_dateEnd.setForeground(new java.awt.Color(0, 0, 0));
         inpt_dateEnd.setCaretColor(new java.awt.Color(127, 140, 141));
         inpt_dateEnd.setEnabled(false);
         inpt_dateEnd.setFocusable(false);
@@ -277,7 +287,7 @@ public class Form_Total extends javax.swing.JPanel {
 
         jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(127, 140, 141));
-        jLabel8.setText("Dạng");
+        jLabel8.setText("Xem theo");
 
         txt_dinhky.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         txt_dinhky.setText("Định kỳ: 13000000");
@@ -322,6 +332,20 @@ public class Form_Total extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(127, 140, 141));
+        jLabel9.setText("Dạng");
+
+        inpt_datatype.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_datatype.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        inpt_datatype.setForeground(new java.awt.Color(127, 140, 141));
+        inpt_datatype.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả", "Hàng ngày", "Hàng tháng", "Ngẫu nhiên", "Thu" }));
+        inpt_datatype.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                inpt_datatypeItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout inpt_ctnLayout = new javax.swing.GroupLayout(inpt_ctn);
         inpt_ctn.setLayout(inpt_ctnLayout);
         inpt_ctnLayout.setHorizontalGroup(
@@ -347,7 +371,13 @@ public class Form_Total extends javax.swing.JPanel {
                 .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btn_end, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbx_dateEnd, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 161, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(inpt_datatype, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(inpt_ctnLayout.createSequentialGroup()
+                        .addGap(1, 1, 1)
+                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -379,7 +409,14 @@ public class Form_Total extends javax.swing.JPanel {
                                 .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(inpt_dateEnd, javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(btn_end, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(inpt_type, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(inpt_type, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(inpt_ctnLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, inpt_ctnLayout.createSequentialGroup()
+                                        .addComponent(jLabel9)
+                                        .addGap(32, 32, 32))
+                                    .addGroup(inpt_ctnLayout.createSequentialGroup()
+                                        .addGap(24, 24, 24)
+                                        .addComponent(inpt_datatype, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addGap(21, 21, 21))
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
@@ -484,6 +521,11 @@ public class Form_Total extends javax.swing.JPanel {
         setup();
     }//GEN-LAST:event_cbx_dateEndItemStateChanged
 
+    private void inpt_datatypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_inpt_datatypeItemStateChanged
+        // TODO add your handling code here:
+        setup();
+    }//GEN-LAST:event_inpt_datatypeItemStateChanged
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_end;
@@ -493,12 +535,14 @@ public class Form_Total extends javax.swing.JPanel {
     private com.raven.datechooser.DateChooser dateEnd;
     private com.raven.datechooser.DateChooser dateStart;
     private javax.swing.JPanel inpt_ctn;
+    private javax.swing.JComboBox<String> inpt_datatype;
     private javax.swing.JTextField inpt_dateEnd;
     private javax.swing.JTextField inpt_dateStart;
     private javax.swing.JComboBox<String> inpt_type;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane spTable;

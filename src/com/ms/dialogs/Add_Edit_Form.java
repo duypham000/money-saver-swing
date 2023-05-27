@@ -5,6 +5,8 @@
 package com.ms.dialogs;
 
 import com.db.dao.EventAdapter;
+import com.db.dao.TemplateAdapter;
+
 import com.raven.datechooser.EventDateChooser;
 import com.raven.datechooser.SelectedAction;
 import com.raven.datechooser.SelectedDate;
@@ -12,6 +14,12 @@ import com.raven.event.EventTimePicker;
 import java.awt.event.KeyEvent;
 import com.raven.model.Activity;
 import com.db.models.*;
+import java.awt.ItemSelectable;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JComboBox;
 
 /**
  *
@@ -24,9 +32,9 @@ public class Add_Edit_Form extends javax.swing.JFrame {
     /**
      * Creates new form add_activity
      */
-    public Add_Edit_Form(Event act) {
+    public Add_Edit_Form(Event act, int userId) {
         initComponents();
-        setup();
+        setup(userId);
         edit = act;
         lbl_title.setText("Sửa hoạt động");
         inpt_money.setText(act.price + "");
@@ -60,14 +68,28 @@ public class Add_Edit_Form extends javax.swing.JFrame {
         inpt_type.setSelectedIndex(typeIndex);
     }
 
-    public Add_Edit_Form() {
+    public Add_Edit_Form(int userId) {
         initComponents();
-        setup();
+        setup(userId);
         edit = null;
         lbl_title.setText("Thêm hoạt động");
     }
 
-    void setup() {
+    private List<Integer> idList = new ArrayList<Integer>();
+
+    void setup(int userId) {
+
+        List<Template> tList = TemplateAdapter.getAllById(userId);
+        idList.clear();
+        idList.add(0, -1);
+        inpt_template.addItem("-trống-");
+
+        for (int i = 0; i < tList.size(); i++) {
+            Template t = tList.get(i);
+            inpt_template.addItem(t.name);
+            idList.add(i + 1, t.id);
+        }
+
         SelectedDate d = date_picker.getSelectedDate();
         inpt_date.setText(d.getDay() + "/" + d.getMonth() + "/" + d.getYear() + " " + time_picker.getSelectedTime());
         date_picker.addEventDateChooser(new EventDateChooser() {
@@ -230,7 +252,11 @@ public class Add_Edit_Form extends javax.swing.JFrame {
         inpt_template.setBackground(new java.awt.Color(255, 255, 255));
         inpt_template.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         inpt_template.setForeground(new java.awt.Color(127, 140, 141));
-        inpt_template.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Hàng ngày", "Hàng tháng", "Ngẫu nhiên", "Thu" }));
+        inpt_template.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                inpt_templateItemStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -265,13 +291,9 @@ public class Add_Edit_Form extends javax.swing.JFrame {
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGap(6, 6, 6)
                                 .addComponent(btn_remove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(time_picker, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(time_picker, javax.swing.GroupLayout.PREFERRED_SIZE, 289, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel7, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(68, 68, 68))
-            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel3Layout.createSequentialGroup()
-                    .addGap(67, 67, 67)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(58, 58, 58)))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -287,7 +309,9 @@ public class Add_Edit_Form extends javax.swing.JFrame {
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(61, 61, 61)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
                 .addComponent(inpt_type, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -303,11 +327,6 @@ public class Add_Edit_Form extends javax.swing.JFrame {
                     .addComponent(btn_remove, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btn_add1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
-            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel3Layout.createSequentialGroup()
-                    .addGap(376, 376, 376)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(469, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -395,6 +414,36 @@ public class Add_Edit_Form extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.dispose();
     }//GEN-LAST:event_btn_removeActionPerformed
+
+    private void inpt_templateItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_inpt_templateItemStateChanged
+        // TODO add your handling code here:
+        int id = inpt_template.getSelectedIndex();
+        if (id == 0) {
+            return;
+        }
+        Template t = TemplateAdapter.getById(idList.get(id));
+        inpt_money.setText(t.price + "");
+        inpt_detail.setText(t.desc);
+
+        int typeIndex = 0;
+        switch (t.type) {
+            case "Hàng ngày":
+                typeIndex = 0;
+                break;
+            case "Hàng tháng":
+                typeIndex = 1;
+                break;
+            case "Ngẫu nhiên":
+                typeIndex = 2;
+                break;
+            case "Thu":
+                typeIndex = 3;
+                break;
+            default:
+                throw new AssertionError();
+        }
+        inpt_type.setSelectedIndex(typeIndex);
+    }//GEN-LAST:event_inpt_templateItemStateChanged
 
     /**
      * @param args the command line arguments

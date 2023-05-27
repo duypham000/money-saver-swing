@@ -8,6 +8,7 @@ import com.db.dao.AccountAdapter;
 import com.db.models.Account;
 import com.raven.model.Activity;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 
 /**
  *
@@ -44,7 +45,6 @@ public class Login_Form extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         inpt_username = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
         btn_add = new javax.swing.JButton();
         cbx_show = new javax.swing.JCheckBox();
         inpt_password = new javax.swing.JPasswordField();
@@ -91,15 +91,15 @@ public class Login_Form extends javax.swing.JFrame {
         inpt_username.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         inpt_username.setForeground(new java.awt.Color(0, 0, 0));
         inpt_username.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_username.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_usernameKeyPressed(evt);
+            }
+        });
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(127, 140, 141));
         jLabel3.setText("Mật khẩu");
-
-        jCheckBox1.setBackground(new java.awt.Color(255, 255, 255));
-        jCheckBox1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jCheckBox1.setForeground(new java.awt.Color(0, 0, 0));
-        jCheckBox1.setText("Tự động đăng nhập");
 
         btn_add.setBackground(new java.awt.Color(52, 152, 219));
         btn_add.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -123,6 +123,11 @@ public class Login_Form extends javax.swing.JFrame {
         inpt_password.setBackground(new java.awt.Color(255, 255, 255));
         inpt_password.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         inpt_password.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_password.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_passwordKeyPressed(evt);
+            }
+        });
 
         j_res.setFont(new java.awt.Font("Segoe UI", 2, 14)); // NOI18N
         j_res.setForeground(new java.awt.Color(0, 0, 0));
@@ -147,7 +152,6 @@ public class Login_Form extends javax.swing.JFrame {
                             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                 .addComponent(inpt_username)
                                 .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
-                            .addComponent(jCheckBox1)
                             .addComponent(j_res, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(inpt_password, javax.swing.GroupLayout.PREFERRED_SIZE, 358, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -170,8 +174,6 @@ public class Login_Form extends javax.swing.JFrame {
                 .addComponent(btn_add, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(j_res)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -212,7 +214,7 @@ public class Login_Form extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
+    void login() {
         String usr = inpt_username.getText();
         String pass = inpt_password.getText();
         Account acc = AccountAdapter.getByUsernameAndPass(usr, pass);
@@ -226,6 +228,9 @@ public class Login_Form extends javax.swing.JFrame {
             j_res.setText("Đăng nhập thất bại!");
             this.id = -1;
         }
+    }
+    private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
+        login();
     }//GEN-LAST:event_btn_addActionPerformed
 
     private void cbx_showActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbx_showActionPerformed
@@ -237,6 +242,20 @@ public class Login_Form extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_cbx_showActionPerformed
 
+    private void inpt_passwordKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_passwordKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            login();
+        }
+    }//GEN-LAST:event_inpt_passwordKeyPressed
+
+    private void inpt_usernameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_usernameKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            login();
+        }
+    }//GEN-LAST:event_inpt_usernameKeyPressed
+
     /**
      * @param args the command line arguments
      */
@@ -246,7 +265,6 @@ public class Login_Form extends javax.swing.JFrame {
     private javax.swing.JCheckBox cbx_show;
     private javax.swing.JPasswordField inpt_password;
     private javax.swing.JTextField inpt_username;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;

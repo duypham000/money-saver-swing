@@ -4,12 +4,19 @@
  */
 package com.ms.layout;
 
+import com.db.dao.DetailAdapter;
+import com.db.dao.EventAdapter;
+import com.db.models.Detail;
+import com.db.models.Event;
 import com.ms.forms.Form_Total;
 import com.ms.forms.Form_EventMngr;
 import com.ms.forms.Form_Setting;
+import com.ms.services.Converter;
 import java.awt.BorderLayout;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  *
@@ -29,22 +36,48 @@ public class HomeLayout extends javax.swing.JFrame {
         initComponents();
         this.userId = id;
         triggle_menu(1);
+        updateData();
+    }
+
+    void updateData() {
+        double countM = 0, countD = 0;
+        List<Event> eM = EventAdapter.getAllMonthById(userId);
+        List<Event> eD = EventAdapter.getAllDayById(userId);
+        Detail detail = DetailAdapter.getByUserId(userId);
+
+        for (int i = 0; i < eM.size(); i++) {
+            Event e = eM.get(i);
+            countM += e.price;
+        }
+        for (int i = 0; i < eD.size(); i++) {
+            Event e = eD.get(i);
+            countD += e.price;
+        }
+        this.label_month.setText(Converter.formatPrice(countM));
+        this.label_today.setText(Converter.formatPrice(countD));
+        this.label_total.setText(Converter.formatPrice(detail.moneyLeft));
+
+        double chartV = (100 - ((double) detail.moneyLeft / (double) detail.totalMoney * 100));
+        chart_total.setValue((int) Math.round(chartV));
     }
 
     void triggle_menu(int id) {
+        JPanel panel = new Form_EventMngr(userId);
         switch (id) {
             case 1:
-                setForm(new Form_EventMngr(userId));
+                panel = (new Form_EventMngr(userId));
                 break;
             case 2:
-                setForm(new Form_Total(userId));
+                panel = (new Form_Total(userId));
                 break;
             case 3:
-                setForm(new Form_Setting(userId));
+                panel = (new Form_Setting(userId));
                 break;
             default:
                 throw new AssertionError();
         }
+        updateData();
+        setForm(panel);
     }
 
     private void setForm(JComponent com) {
@@ -68,12 +101,12 @@ public class HomeLayout extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        label_month = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        label_today = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        liquidProgress1 = new com.ms.chart.LiquidProgress();
+        label_total = new javax.swing.JLabel();
+        chart_total = new com.ms.chart.LiquidProgress();
         jPanel7 = new javax.swing.JPanel();
         btn_setting = new javax.swing.JButton();
         btn_total = new javax.swing.JButton();
@@ -82,6 +115,7 @@ public class HomeLayout extends javax.swing.JFrame {
         body = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setModalExclusionType(java.awt.Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -102,11 +136,11 @@ public class HomeLayout extends javax.swing.JFrame {
         jLabel1.setAlignmentX(0.5F);
         jLabel1.setAutoscrolls(true);
 
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel2.setForeground(new java.awt.Color(127, 140, 141));
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText("7,000,000");
-        jLabel2.setAlignmentX(0.5F);
+        label_month.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        label_month.setForeground(new java.awt.Color(127, 140, 141));
+        label_month.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_month.setText("7,000,000");
+        label_month.setAlignmentX(0.5F);
 
         jLabel5.setBackground(new java.awt.Color(127, 140, 141));
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -116,11 +150,11 @@ public class HomeLayout extends javax.swing.JFrame {
         jLabel5.setAlignmentX(0.5F);
         jLabel5.setAutoscrolls(true);
 
-        jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel6.setForeground(new java.awt.Color(127, 140, 141));
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setText("7,000,000");
-        jLabel6.setAlignmentX(0.5F);
+        label_today.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        label_today.setForeground(new java.awt.Color(127, 140, 141));
+        label_today.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_today.setText("7,000,000");
+        label_today.setAlignmentX(0.5F);
 
         jLabel7.setBackground(new java.awt.Color(127, 140, 141));
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -130,11 +164,11 @@ public class HomeLayout extends javax.swing.JFrame {
         jLabel7.setAlignmentX(0.5F);
         jLabel7.setAutoscrolls(true);
 
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jLabel8.setForeground(new java.awt.Color(127, 140, 141));
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel8.setText("7,000,000");
-        jLabel8.setAlignmentX(0.5F);
+        label_total.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        label_total.setForeground(new java.awt.Color(127, 140, 141));
+        label_total.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        label_total.setText("7,000,000");
+        label_total.setAlignmentX(0.5F);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -149,9 +183,9 @@ public class HomeLayout extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(6, 6, 6)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(label_today, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(label_month, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(label_total, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -160,20 +194,20 @@ public class HomeLayout extends javax.swing.JFrame {
                 .addGap(12, 12, 12)
                 .addComponent(jLabel7)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel8)
+                .addComponent(label_total)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
+                .addComponent(label_month)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel6))
+                .addComponent(label_today))
         );
 
         jLabel1.getAccessibleContext().setAccessibleName("lbl_1");
 
-        liquidProgress1.setBorder(null);
+        chart_total.setBorder(null);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -182,7 +216,7 @@ public class HomeLayout extends javax.swing.JFrame {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(liquidProgress1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(chart_total, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -190,7 +224,7 @@ public class HomeLayout extends javax.swing.JFrame {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(liquidProgress1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(chart_total, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -338,18 +372,18 @@ public class HomeLayout extends javax.swing.JFrame {
     private javax.swing.JButton btn_setting;
     private javax.swing.JButton btn_today;
     private javax.swing.JButton btn_total;
+    private com.ms.chart.LiquidProgress chart_total;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JLabel label_month;
+    private javax.swing.JLabel label_today;
+    private javax.swing.JLabel label_total;
     private javax.swing.JPanel line;
-    private com.ms.chart.LiquidProgress liquidProgress1;
     // End of variables declaration//GEN-END:variables
 }

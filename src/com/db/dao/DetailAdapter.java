@@ -23,7 +23,7 @@ public class DetailAdapter {
             ConnectDB conn = new ConnectDB();
             ResultSet e = conn.query("SELECT * FROM `detail` WHERE idUser = " + userId + "");
             while (e.next()) {
-                return new Detail(e.getInt(1), e.getInt(2), e.getDouble(3), e.getDouble(4), e.getDouble(5), e.getDouble(6), e.getDouble(7));
+                return new Detail(e.getInt(1), e.getInt(2), e.getLong(3), e.getLong(4), e.getLong(5), e.getLong(6), e.getLong(7));
             }
         } catch (Exception e) {
         }
@@ -35,7 +35,7 @@ public class DetailAdapter {
             ConnectDB conn = new ConnectDB();
             ResultSet e = conn.query("SELECT * FROM `detail` WHERE id = " + id);
             while (e.next()) {
-                return new Detail(e.getInt(1), e.getInt(2), e.getDouble(3), e.getDouble(4), e.getDouble(5), e.getDouble(6), e.getDouble(7));
+                return new Detail(e.getInt(1), e.getInt(2), e.getLong(3), e.getLong(4), e.getLong(5), e.getLong(6), e.getLong(7));
             }
         } catch (Exception e) {
         }

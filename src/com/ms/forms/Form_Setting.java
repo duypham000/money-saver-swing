@@ -4,10 +4,23 @@
  */
 package com.ms.forms;
 
+import com.db.dao.AccountAdapter;
+import com.db.dao.DetailAdapter;
+import com.db.dao.TemplateAdapter;
+import com.db.models.Detail;
 import com.db.models.Event;
+import com.db.models.Template;
 import com.ms.dialogs.Add_Edit_Form;
+import com.ms.dialogs.Add_Edit_Template_Form;
+import com.ms.dialogs.Register_Form;
 import com.raven.model.Activity;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -16,6 +29,15 @@ import java.awt.event.KeyEvent;
 public class Form_Setting extends javax.swing.JPanel {
 
     private int userId;
+    private int selectedId = -1;
+    private List<Integer> idList = new ArrayList<Integer>();
+
+    private void setSelected(int id) {
+        if (id == -1) {
+            return;
+        }
+        this.selectedId = idList.get(id);
+    }
 
     /**
      * Creates new form Form_Home
@@ -23,6 +45,45 @@ public class Form_Setting extends javax.swing.JPanel {
     public Form_Setting(int id) {
         initComponents();
         this.userId = id;
+
+        ListSelectionModel rowSM = table.getSelectionModel();
+        rowSM.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (e.getValueIsAdjusting()) {
+                    return; // if you don't want to handle intermediate selections
+                }
+                ListSelectionModel rowSM = (ListSelectionModel) e.getSource();
+                int selectedIndex = rowSM.getMinSelectionIndex();
+//                var sel = table.getSelectedColumns();
+                setSelected(selectedIndex);
+                btn_delete.setEnabled(true);
+                btn_edit.setEnabled(true);
+            }
+        });
+        updateData();
+    }
+
+    void updateData() {
+        inpt_user.setText(AccountAdapter.getById(userId).username);
+        inpt_pass.setText(AccountAdapter.getById(userId).password);
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
+
+        Detail d = DetailAdapter.getByUserId(userId);
+        this.inpt_moneyL.setText(d.moneyLeft + "");
+        this.inpt_moneyT.setText(d.totalMoney + "");
+        this.inpt_moneyML.setText(d.maxPriceMonth + "");
+        this.inpt_moneyWL.setText(d.maxPriceWeek + "");
+        this.inpt_moneyDL.setText(d.maxPriceDay + "");
+
+        List<Template> tList = TemplateAdapter.getAllById(userId);
+        idList.clear();
+
+        for (int i = 0; i < tList.size(); i++) {
+            Template t = tList.get(i);
+            idList.add(i, t.id);
+            table.addRow(new Object[]{t.name + "", t.desc + "", t.price + "", t.type + ""});
+        }
     }
 
     /**
@@ -50,17 +111,32 @@ public class Form_Setting extends javax.swing.JPanel {
         jLabel3 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
-        inpt_money = new javax.swing.JTextField();
-        inpt_money1 = new javax.swing.JTextField();
-        btn_edit1 = new javax.swing.JButton();
-        btn_delete1 = new javax.swing.JButton();
+        inpt_moneyL = new javax.swing.JTextField();
+        btn_save = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        inpt_user = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        inpt_moneyT = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        inpt_moneyML = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        inpt_moneyWL = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        inpt_moneyDL = new javax.swing.JTextField();
+        jLabel11 = new javax.swing.JLabel();
+        btn_editAcc = new javax.swing.JButton();
+        label_res = new javax.swing.JLabel();
+        inpt_pass = new javax.swing.JPasswordField();
 
         jScrollPane1.setViewportView(jEditorPane1);
 
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        jPanel2.setBackground(new java.awt.Color(255, 255, 255));
+
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(0, 0, 0));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setText("Cài đặt thuộc tính");
         jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -81,6 +157,8 @@ public class Form_Setting extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+
         btn_add.setBackground(new java.awt.Color(52, 152, 219));
         btn_add.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btn_add.setForeground(new java.awt.Color(255, 255, 255));
@@ -97,6 +175,7 @@ public class Form_Setting extends javax.swing.JPanel {
         btn_edit.setForeground(new java.awt.Color(255, 255, 255));
         btn_edit.setText("Sửa");
         btn_edit.setBorderPainted(false);
+        btn_edit.setEnabled(false);
         btn_edit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_editActionPerformed(evt);
@@ -108,6 +187,7 @@ public class Form_Setting extends javax.swing.JPanel {
         btn_delete.setForeground(new java.awt.Color(255, 255, 255));
         btn_delete.setText("Xóa");
         btn_delete.setBorderPainted(false);
+        btn_delete.setEnabled(false);
         btn_delete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_deleteActionPerformed(evt);
@@ -115,6 +195,7 @@ public class Form_Setting extends javax.swing.JPanel {
         });
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
         jLabel2.setText("Đinh kỳ");
 
         spTable.setBorder(null);
@@ -124,7 +205,7 @@ public class Form_Setting extends javax.swing.JPanel {
 
             },
             new String [] {
-                "Tổng tiền", "Chi tiết", "Thời gian", "Dạng"
+                "Tên", "Chi tiết", "Tổng tiền", "Dạng"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -146,13 +227,13 @@ public class Form_Setting extends javax.swing.JPanel {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(spTable)
+                    .addComponent(spTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1151, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btn_edit)
-                        .addGap(18, 18, 18)
                         .addComponent(btn_add)
+                        .addGap(18, 18, 18)
+                        .addComponent(btn_edit)
                         .addGap(18, 18, 18)
                         .addComponent(btn_delete)))
                 .addContainerGap())
@@ -174,69 +255,140 @@ public class Form_Setting extends javax.swing.JPanel {
 
         jLabel2.getAccessibleContext().setAccessibleName("Định kỳ");
 
+        jPanel4.setBackground(new java.awt.Color(255, 255, 255));
+
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(0, 0, 0));
         jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel3.setText("Cài đặt thuộc tính");
         jLabel3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
 
+        jPanel5.setBackground(new java.awt.Color(255, 255, 255));
+
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setText("Password");
 
-        inpt_money.setEditable(false);
-        inpt_money.setBackground(new java.awt.Color(255, 255, 255));
-        inpt_money.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        inpt_money.setCaretColor(new java.awt.Color(127, 140, 141));
-        inpt_money.setEnabled(false);
-        inpt_money.setFocusable(false);
-        inpt_money.addKeyListener(new java.awt.event.KeyAdapter() {
+        inpt_moneyL.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_moneyL.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_moneyL.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_moneyL.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_moneyL.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                inpt_moneyKeyPressed(evt);
+                inpt_moneyLKeyPressed(evt);
             }
         });
 
-        inpt_money1.setEditable(false);
-        inpt_money1.setBackground(new java.awt.Color(255, 255, 255));
-        inpt_money1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        inpt_money1.setCaretColor(new java.awt.Color(127, 140, 141));
-        inpt_money1.setEnabled(false);
-        inpt_money1.setFocusable(false);
-        inpt_money1.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                inpt_money1KeyPressed(evt);
-            }
-        });
-
-        btn_edit1.setBackground(new java.awt.Color(46, 204, 113));
-        btn_edit1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btn_edit1.setForeground(new java.awt.Color(255, 255, 255));
-        btn_edit1.setText("Đổi thông tin");
-        btn_edit1.setActionCommand("Đổi thông tin");
-        btn_edit1.setBorderPainted(false);
-        btn_edit1.addActionListener(new java.awt.event.ActionListener() {
+        btn_save.setBackground(new java.awt.Color(46, 204, 113));
+        btn_save.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btn_save.setForeground(new java.awt.Color(255, 255, 255));
+        btn_save.setText("Lưu lại");
+        btn_save.setBorderPainted(false);
+        btn_save.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_edit1ActionPerformed(evt);
-            }
-        });
-
-        btn_delete1.setBackground(new java.awt.Color(231, 76, 60));
-        btn_delete1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btn_delete1.setForeground(new java.awt.Color(255, 255, 255));
-        btn_delete1.setText("Đăng xuất");
-        btn_delete1.setBorderPainted(false);
-        btn_delete1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btn_delete1ActionPerformed(evt);
+                btn_saveActionPerformed(evt);
             }
         });
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("Quản lý đăng nhập");
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel6.setText("Username");
+        jLabel6.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel6.setText("Tiền còn lại");
 
-        jCheckBox1.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jCheckBox1.setText("Tự động đăng nhập");
+        inpt_user.setEditable(false);
+        inpt_user.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_user.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_user.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_user.setCaretColor(new java.awt.Color(0, 0, 0));
+        inpt_user.setEnabled(false);
+        inpt_user.setFocusable(false);
+        inpt_user.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_userKeyPressed(evt);
+            }
+        });
+
+        jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel7.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel7.setText("Username");
+
+        inpt_moneyT.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_moneyT.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_moneyT.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_moneyT.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_moneyT.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_moneyTKeyPressed(evt);
+            }
+        });
+
+        jLabel8.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel8.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel8.setText("Tổng tiền");
+
+        inpt_moneyML.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_moneyML.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_moneyML.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_moneyML.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_moneyML.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_moneyMLKeyPressed(evt);
+            }
+        });
+
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel9.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel9.setText("Giới hạn trong tháng");
+
+        inpt_moneyWL.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_moneyWL.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_moneyWL.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_moneyWL.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_moneyWL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_moneyWLKeyPressed(evt);
+            }
+        });
+
+        jLabel10.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel10.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel10.setText("Giới hạn trong tuần");
+
+        inpt_moneyDL.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_moneyDL.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_moneyDL.setForeground(new java.awt.Color(0, 0, 0));
+        inpt_moneyDL.setCaretColor(new java.awt.Color(127, 140, 141));
+        inpt_moneyDL.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                inpt_moneyDLKeyPressed(evt);
+            }
+        });
+
+        jLabel11.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel11.setForeground(new java.awt.Color(0, 0, 0));
+        jLabel11.setText("Giới hạn trong ngày");
+
+        btn_editAcc.setBackground(new java.awt.Color(46, 204, 113));
+        btn_editAcc.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btn_editAcc.setForeground(new java.awt.Color(255, 255, 255));
+        btn_editAcc.setText("Đổi thông tin");
+        btn_editAcc.setBorderPainted(false);
+        btn_editAcc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_editAccActionPerformed(evt);
+            }
+        });
+
+        label_res.setFont(new java.awt.Font("Segoe UI", 2, 14)); // NOI18N
+        label_res.setForeground(new java.awt.Color(0, 0, 0));
+        label_res.setText("Tổng tiền nên lớn hơn số tiền còn lại");
+
+        inpt_pass.setBackground(new java.awt.Color(255, 255, 255));
+        inpt_pass.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        inpt_pass.setForeground(new java.awt.Color(0, 0, 0));
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
@@ -244,51 +396,93 @@ public class Form_Setting extends javax.swing.JPanel {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel5)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(btn_edit1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btn_delete1, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel5)
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(inpt_money, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(inpt_moneyL, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(inpt_moneyML, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(inpt_moneyDL, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11)))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(inpt_moneyT, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel5Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(jLabel6)))
+                                .addComponent(inpt_moneyWL, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(btn_save, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel10)))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(inpt_user, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
-                            .addComponent(inpt_money1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jCheckBox1))
-                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(inpt_pass, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(btn_editAcc, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(label_res, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(170, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addGap(13, 13, 13)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(inpt_moneyL, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel9)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(inpt_moneyML, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addComponent(jLabel11)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(inpt_moneyDL, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel8)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(inpt_moneyT, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(inpt_moneyWL, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btn_save, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(label_res)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
                 .addComponent(jLabel5)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel6))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(inpt_money, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(inpt_money1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btn_edit1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btn_delete1, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(49, 49, 49))
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(inpt_user, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(inpt_pass, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(18, 18, 18)
-                .addComponent(jCheckBox1)
-                .addContainerGap(35, Short.MAX_VALUE))
+                .addComponent(btn_editAcc, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(56, 56, 56))
         );
 
         jLabel4.getAccessibleContext().setAccessibleName("Quản lý tài khoản");
-        btn_edit1.getAccessibleContext().setAccessibleName("Đổi mật khẩu");
+        btn_save.getAccessibleContext().setAccessibleName("Đổi mật khẩu");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -357,74 +551,178 @@ public class Form_Setting extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_addActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_addActionPerformed
-        var addForm = new Add_Edit_Form();
+        var addForm = new Add_Edit_Template_Form();
         addForm.setAlwaysOnTop(true);
         addForm.setVisible(true);
+        addForm.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // your code
+                updateData();
+            }
+        });
     }//GEN-LAST:event_btn_addActionPerformed
 
     private void btn_editActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editActionPerformed
-        var editForm = new Add_Edit_Form(new Event(1, 15000, "Mua cháo", "25/7/2022 11:25 PM", "Ngẫu nhiên", 1));
+        if (selectedId == -1) {
+            return;
+        }
+        Template t = TemplateAdapter.getById(selectedId);
+        var editForm = new Add_Edit_Template_Form(t);
         editForm.setAlwaysOnTop(true);
         editForm.setVisible(true);
+        editForm.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // your code
+                updateData();
+            }
+        });
     }//GEN-LAST:event_btn_editActionPerformed
 
     private void btn_deleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_deleteActionPerformed
-        var res = table.getSelectedRow();
-        System.out.println(res);
+        if (this.selectedId == -1) {
+            return;
+        }
+        TemplateAdapter.delete(this.selectedId);
+        updateData();
     }//GEN-LAST:event_btn_deleteActionPerformed
 
-    private void inpt_moneyKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_moneyKeyPressed
+    private void inpt_moneyLKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_moneyLKeyPressed
         // TODO add your handling code here:
-        String moneyV = inpt_money.getText();
-        int length = moneyV.length();
-
-        char c = evt.getKeyChar();
+        String moneyV = inpt_moneyL.getText();
         if (evt.getKeyChar() >= '0' && evt.getKeyChar() <= '9') {
-            inpt_money.setEditable(true);
+            inpt_moneyL.setEditable(true);
         } else {
             if (evt.getExtendedKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getExtendedKeyCode() == KeyEvent.VK_DELETE) {
-                inpt_money.setEditable(true);
+                inpt_moneyL.setEditable(true);
             } else {
-                inpt_money.setEditable(false);
+                inpt_moneyL.setEditable(false);
             }
         }
-    }//GEN-LAST:event_inpt_moneyKeyPressed
+    }//GEN-LAST:event_inpt_moneyLKeyPressed
 
-    private void inpt_money1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_money1KeyPressed
+    private void btn_saveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_saveActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_inpt_money1KeyPressed
+        Detail d = DetailAdapter.getByUserId(userId);
+        long mL = Long.parseLong(this.inpt_moneyL.getText());
+        long mT = Long.parseLong(this.inpt_moneyT.getText());
+        long mML = Long.parseLong(this.inpt_moneyML.getText());
+        long mWL = Long.parseLong(this.inpt_moneyWL.getText());
+        long mDL = Long.parseLong(this.inpt_moneyDL.getText());
 
-    private void btn_edit1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_edit1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btn_edit1ActionPerformed
+        if (mT < mL) {
+            label_res.setText("Tổng tiền phải lớn hơn số tiền còn lại!");
+        } else {
+            DetailAdapter.update(new Detail(d.id, d.idUser, mL, mT, mML, mWL, mDL));
+            label_res.setText("Đã lưu!");
+        }
+        updateData();
+    }//GEN-LAST:event_btn_saveActionPerformed
 
-    private void btn_delete1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_delete1ActionPerformed
+    private void inpt_userKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_userKeyPressed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btn_delete1ActionPerformed
+    }//GEN-LAST:event_inpt_userKeyPressed
+
+    private void inpt_moneyTKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_moneyTKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyChar() >= '0' && evt.getKeyChar() <= '9') {
+            inpt_moneyT.setEditable(true);
+        } else {
+            if (evt.getExtendedKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getExtendedKeyCode() == KeyEvent.VK_DELETE) {
+                inpt_moneyT.setEditable(true);
+            } else {
+                inpt_moneyT.setEditable(false);
+            }
+        }
+    }//GEN-LAST:event_inpt_moneyTKeyPressed
+
+    private void inpt_moneyMLKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_moneyMLKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyChar() >= '0' && evt.getKeyChar() <= '9') {
+            inpt_moneyML.setEditable(true);
+        } else {
+            if (evt.getExtendedKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getExtendedKeyCode() == KeyEvent.VK_DELETE) {
+                inpt_moneyML.setEditable(true);
+            } else {
+                inpt_moneyML.setEditable(false);
+            }
+        }
+    }//GEN-LAST:event_inpt_moneyMLKeyPressed
+
+    private void inpt_moneyWLKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_moneyWLKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyChar() >= '0' && evt.getKeyChar() <= '9') {
+            inpt_moneyWL.setEditable(true);
+        } else {
+            if (evt.getExtendedKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getExtendedKeyCode() == KeyEvent.VK_DELETE) {
+                inpt_moneyWL.setEditable(true);
+            } else {
+                inpt_moneyWL.setEditable(false);
+            }
+        }
+    }//GEN-LAST:event_inpt_moneyWLKeyPressed
+
+    private void inpt_moneyDLKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inpt_moneyDLKeyPressed
+        // TODO add your handling code here:
+        if (evt.getKeyChar() >= '0' && evt.getKeyChar() <= '9') {
+            inpt_moneyDL.setEditable(true);
+        } else {
+            if (evt.getExtendedKeyCode() == KeyEvent.VK_BACK_SPACE || evt.getExtendedKeyCode() == KeyEvent.VK_DELETE) {
+                inpt_moneyDL.setEditable(true);
+            } else {
+                inpt_moneyDL.setEditable(false);
+            }
+        }
+    }//GEN-LAST:event_inpt_moneyDLKeyPressed
+
+    private void btn_editAccActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_editAccActionPerformed
+        // TODO add your handling code here:
+        var editForm = new Register_Form(userId);
+        editForm.setAlwaysOnTop(true);
+        editForm.setVisible(true);
+        editForm.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                // your code
+                updateData();
+            }
+        });
+    }//GEN-LAST:event_btn_editAccActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_add;
     private javax.swing.JButton btn_delete;
-    private javax.swing.JButton btn_delete1;
     private javax.swing.JButton btn_edit;
-    private javax.swing.JButton btn_edit1;
-    private javax.swing.JTextField inpt_money;
-    private javax.swing.JTextField inpt_money1;
-    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JButton btn_editAcc;
+    private javax.swing.JButton btn_save;
+    private javax.swing.JTextField inpt_moneyDL;
+    private javax.swing.JTextField inpt_moneyL;
+    private javax.swing.JTextField inpt_moneyML;
+    private javax.swing.JTextField inpt_moneyT;
+    private javax.swing.JTextField inpt_moneyWL;
+    private javax.swing.JPasswordField inpt_pass;
+    private javax.swing.JTextField inpt_user;
     private javax.swing.JEditorPane jEditorPane1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel label_res;
     private javax.swing.JScrollPane spTable;
     private com.raven.swing.Table table;
     // End of variables declaration//GEN-END:variables

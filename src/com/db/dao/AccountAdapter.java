@@ -18,6 +18,18 @@ public class AccountAdapter {
     public AccountAdapter() {
     }
 
+    public static Account getById(int id) {
+        try {
+            ConnectDB conn = new ConnectDB();
+            ResultSet e = conn.query("SELECT * FROM `accounts` WHERE id = " + id);
+            while (e.next()) {
+                return new Account(e.getInt(1), e.getString(2), e.getString(3));
+            }
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
     public static List<Account> getAll() {
         List<Account> res = new ArrayList<Account>();
         try {

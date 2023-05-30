@@ -13,6 +13,7 @@ import com.db.models.Template;
 import com.ms.dialogs.Add_Edit_Form;
 import com.ms.dialogs.Add_Edit_Template_Form;
 import com.ms.dialogs.Register_Form;
+import com.ms.services.Converter;
 import com.raven.model.Activity;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class Form_Setting extends javax.swing.JPanel {
         for (int i = 0; i < tList.size(); i++) {
             Template t = tList.get(i);
             idList.add(i, t.id);
-            table.addRow(new Object[]{t.name + "", t.desc + "", t.price + "", t.type + ""});
+            table.addRow(new Object[]{t.name + "", t.desc + "", Converter.formatPrice(t.price), t.type + ""});
         }
     }
 

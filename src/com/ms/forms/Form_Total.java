@@ -137,7 +137,7 @@ public class Form_Total extends javax.swing.JPanel {
             } else {
                 dk += e.price;
             }
-            table.addRow(new Object[]{e.price, e.desc, e.time, e.type});
+            table.addRow(new Object[]{Converter.formatPrice(e.price), e.desc, e.time, e.type});
         }
 
         txt_thu.setText("Thu: " + Converter.formatPrice(t));
@@ -227,11 +227,11 @@ public class Form_Total extends javax.swing.JPanel {
         inpt_type.setForeground(new java.awt.Color(127, 140, 141));
         inpt_type.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả", "Hôm nay", "Tháng này", "Năm nay" }));
 
+        inpt_dateStart.setEditable(false);
         inpt_dateStart.setBackground(new java.awt.Color(255, 255, 255));
         inpt_dateStart.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         inpt_dateStart.setForeground(new java.awt.Color(0, 0, 0));
         inpt_dateStart.setCaretColor(new java.awt.Color(127, 140, 141));
-        inpt_dateStart.setEnabled(false);
         inpt_dateStart.setFocusable(false);
         inpt_dateStart.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -246,11 +246,11 @@ public class Form_Total extends javax.swing.JPanel {
             }
         });
 
+        inpt_dateEnd.setEditable(false);
         inpt_dateEnd.setBackground(new java.awt.Color(255, 255, 255));
         inpt_dateEnd.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         inpt_dateEnd.setForeground(new java.awt.Color(0, 0, 0));
         inpt_dateEnd.setCaretColor(new java.awt.Color(127, 140, 141));
-        inpt_dateEnd.setEnabled(false);
         inpt_dateEnd.setFocusable(false);
         inpt_dateEnd.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
